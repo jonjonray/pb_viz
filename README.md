@@ -36,9 +36,9 @@ Weekend
 - [x] Write out math for scaling and producing orbs in a logical manner
 
 Day 1
-- [ ] Write Company class logic
-- [ ] Design company orb for visual appeal
-- [ ] Be able to render one instance of company with properly scaled orbs.
+- [x] Write Company class logic
+- [x] Design company orb for visual appeal
+- [x] Be able to render one instance of company with properly scaled orbs.
 
 Day 2
 - [ ] Write logic for rendering all Companies, including:

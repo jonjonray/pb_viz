@@ -70,38 +70,24 @@
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__financials_js__ = __webpack_require__(2);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__db_viz_jsx__ = __webpack_require__(4);
+
+
+
 
 
 document.addEventListener("DOMContentLoaded", () => {
-
-
   const canvasEl = document.getElementsByTagName("canvas")[0];
+  canvasEl.width = window.innerWidth;
+  canvasEl.height = window.innerHeight;
+  const ctx = canvasEl.getContext("2d");
+  ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+  // ctx.fillStyle = "#f4b042";
+  // ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
 
+  const board = new __WEBPACK_IMPORTED_MODULE_1__db_viz_jsx__["a" /* default */](__WEBPACK_IMPORTED_MODULE_0__financials_js__["a" /* default */]);
+  board.render(ctx);
 
-
-
-const draw = () =>  {
-    const ctx = canvasEl.getContext("2d");
-    ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
-    ctx.fillStyle = "#f4b042";
-    ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
-  };
-
-  const totalMktCap = (financials) => {
-    let result = 0;
-    financials.forEach(company => {
-      result += Math.floor(company["Market Cap"]);
-    });
-    return result;
-  };
-
-  draw();
-
-
-  console.log(canvasEl);
-  console.log(window.innerWidth);
-  console.log("I AM WORKING");
-  console.log(totalMktCap(__WEBPACK_IMPORTED_MODULE_0__financials_js__["a" /* default */]));
 });
 
 
@@ -8701,6 +8687,82 @@ const financials = [
 
 
 /* harmony default export */ __webpack_exports__["a"] = (financials);
+
+
+/***/ }),
+/* 3 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+
+class Company {
+  constructor(mktCap, pb, scale, name, ticker, posX, posY, color = "#66ceff"){
+    this.mktCap = mktCap;
+    this.pb = pb;
+    this.radius = Math.sqrt((scale * 900000)/Math.PI);
+    this.innerRadius = Math.sqrt(((scale * 900000) / pb)/Math.PI);
+    this.x = posX;
+    this.y = posY;
+    this.color = color;
+  }
+
+  generatePosition(){
+
+  }
+
+  render(){
+
+  }
+
+  draw(ctx){
+    ctx.fillStyle = this.color;
+    ctx.beginPath();
+    ctx.arc(this.x,this.y,this.radius,0,2.5*Math.PI);
+    ctx.stroke();
+    ctx.fill();
+
+    ctx.fillStyle = "#faff9e";
+    ctx.beginPath();
+    ctx.arc(this.x,this.y,this.innerRadius,0,2.5*Math.PI);
+    ctx.stroke();
+    ctx.fill();
+  }
+}
+
+/* harmony default export */ __webpack_exports__["a"] = (Company);
+
+
+/***/ }),
+/* 4 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__company_jsx__ = __webpack_require__(3);
+
+
+class Board {
+  constructor(financials){
+    this.financials = financials;
+    this.test = new __WEBPACK_IMPORTED_MODULE_0__company_jsx__["a" /* default */](500,3, 500/this.totalMktCap(this.financials), "test","tst",  200, 150);
+  }
+
+  totalMktCap(financials) {
+    let result = 0;
+    financials.forEach(company => {
+      result += Math.floor(company["Market Cap"]);
+    });
+    return result;
+  }
+
+
+
+  render(ctx){
+    document.addEventListener("onmousemove", this.handleMouseOver);
+    this.test.draw(ctx);
+  }
+}
+
+/* harmony default export */ __webpack_exports__["a"] = (Board);
 
 
 /***/ })
