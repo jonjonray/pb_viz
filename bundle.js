@@ -78,15 +78,15 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 document.addEventListener("DOMContentLoaded", () => {
   const canvasEl = document.getElementsByTagName("canvas")[0];
-  canvasEl.width = window.innerWidth;
-  canvasEl.height = window.innerHeight;
+  canvasEl.width = "1324";
+  canvasEl.height = "1500";
   const ctx = canvasEl.getContext("2d");
-  ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+  ctx.clearRect(0, 0, canvasEl.width, canvasEl.height);
   // ctx.fillStyle = "#f4b042";
   // ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
 
-  const board = new __WEBPACK_IMPORTED_MODULE_1__db_viz_jsx__["a" /* default */](__WEBPACK_IMPORTED_MODULE_0__financials_js__["a" /* default */]);
-  board.render(ctx);
+  const board = new __WEBPACK_IMPORTED_MODULE_1__db_viz_jsx__["a" /* default */](__WEBPACK_IMPORTED_MODULE_0__financials_js__["a" /* default */],ctx,canvasEl);
+  board.render();
 
 });
 
@@ -8696,36 +8696,58 @@ const financials = [
 "use strict";
 
 class Company {
-  constructor(mktCap, pb, scale, name, ticker, posX, posY, color = "#66ceff"){
+  constructor(mktCap, pb, scale, name, ticker, posX, posY, hover = false){
     this.mktCap = mktCap;
     this.pb = pb;
-    this.radius = Math.sqrt((scale * 900000)/Math.PI);
-    this.innerRadius = Math.sqrt(((scale * 900000) / pb)/Math.PI);
+    this.name = name;
+    this.ticker = ticker;
+    this.radius = Math.sqrt((scale * 400000)/Math.PI);
+    this.innerRadius = Math.sqrt(((scale * 400000) / pb)/Math.PI);
     this.x = posX;
     this.y = posY;
-    this.color = color;
-  }
-
-  generatePosition(){
-
-  }
-
-  render(){
-
+    this.hover = hover;
   }
 
   draw(ctx){
-    ctx.fillStyle = this.color;
-    ctx.beginPath();
-    ctx.arc(this.x,this.y,this.radius,0,2.5*Math.PI);
-    ctx.stroke();
-    ctx.fill();
+    if (this.hover) {
 
-    ctx.fillStyle = "#faff9e";
-    ctx.beginPath();
-    ctx.arc(this.x,this.y,this.innerRadius,0,2.5*Math.PI);
-    ctx.stroke();
-    ctx.fill();
+      ctx.strokeStyle = "black";
+      ctx.fillStyle = "white";
+      ctx.rect(this.x + this.radius + 5 ,this.y + this.radius + 5, 250, 250);
+      ctx.stroke();
+      ctx.fill();
+      ctx.font = "15px Arial";
+      ctx.fillStyle = "black";
+      ctx.fillText(`Company:  ${this.name}(${this.ticker})`,this.x + this.radius + 10 ,this.y + this.radius + 20);
+      ctx.fillText(`Market Value:  $${this.mktCap} billion`,this.x + this.radius + 10 ,this.y + this.radius + 45);
+      ctx.fillText(`Book Value:  $${Math.floor(this.mktCap/this.pb)} billion`,this.x + this.radius + 10 ,this.y + this.radius + 70);
+      ctx.fillText(`Price/Book:  ${this.pb}`,this.x + this.radius + 10 ,this.y + this.radius + 95);
+
+      ctx.fillStyle = "#3fc2ff";
+      ctx.beginPath();
+      ctx.arc(this.x,this.y,this.radius,0,2.5*Math.PI);
+      ctx.stroke();
+      ctx.fill();
+
+      ctx.fillStyle = "#f7ff68";
+      ctx.beginPath();
+      ctx.arc(this.x,this.y,this.innerRadius,0,2.5*Math.PI);
+      ctx.stroke();
+      ctx.fill();
+
+    } else {
+      ctx.fillStyle = "#66ceff";
+      ctx.beginPath();
+      ctx.arc(this.x,this.y,this.radius,0,2.5*Math.PI);
+      ctx.stroke();
+      ctx.fill();
+
+      ctx.fillStyle = "#faff9e";
+      ctx.beginPath();
+      ctx.arc(this.x,this.y,this.innerRadius,0,2.5*Math.PI);
+      ctx.stroke();
+      ctx.fill();
+    }
   }
 }
 
@@ -8741,12 +8763,64 @@ class Company {
 
 
 class Board {
-  constructor(financials){
+  constructor(financials,ctx,canvas){
     this.financials = financials;
-    this.test = new __WEBPACK_IMPORTED_MODULE_0__company_jsx__["a" /* default */](500,3, 500/this.totalMktCap(this.financials), "test","tst",  200, 150);
+    this.totalMktCap = this.totalMarketCap(this.financials);
+    this.test = new __WEBPACK_IMPORTED_MODULE_0__company_jsx__["a" /* default */](500,3, 500/this.totalMktCap, "test","tst",  200, 150);
+    document.addEventListener("mousemove", e => this.handleMouseOver(e,ctx));
+    this.ctx = ctx;
+    this.canvas = canvas;
+    this.companies = [];
+    this.positions = [];
+    this.createCompanies();
+    this.isColliding = this.isColliding.bind(this);
+    this.generatePosition = this.generatePosition.bind(this);
   }
 
-  totalMktCap(financials) {
+  createCompanies(){
+    this.financials.forEach(company => {
+      let pos = this.generatePosition(company);
+      this.companies.push(new __WEBPACK_IMPORTED_MODULE_0__company_jsx__["a" /* default */](
+        company["Market Cap"],
+        company["Price/Book"],
+        company["Market Cap"]/this.totalMktCap,
+        company["Name"],
+        company["Symbol"],
+        pos[0],
+        pos[1]));
+    });
+  }
+
+  generatePosition(company){
+    let pos = [Math.round((Math.random() * (this.canvas.width - 30))),
+              Math.round((Math.random() * (this.canvas.height - 30)))];
+    while (this.isColliding(pos,company)) {
+      pos = [(Math.random() * this.canvas.width),
+                (Math.random() * this.canvas.height)];
+    }
+
+    return pos;
+  }
+
+  isColliding(pos,companyFin){
+    let radius = Math.sqrt(((companyFin["Market Cap"]/this.totalMktCap) * 400000)/Math.PI);
+
+    let result = false;
+    this.companies.forEach(company => {
+      if (Math.abs(pos[0] - company.x ) + (Math.abs(pos[1] - company.y ))
+                      <= radius + company.radius) {
+          result = true;
+      } else if ( Math.abs(0 - pos[0]) <= radius || Math.abs(0 - pos[1]) <= radius ){
+        result = true;
+      } else if (Math.abs(this.canvas.width - pos[0]) <= radius ||
+        Math.abs(this.canvas.height - pos[1]) <= radius){
+          result = true;
+        }
+    });
+    return result;
+  }
+
+  totalMarketCap(financials) {
     let result = 0;
     financials.forEach(company => {
       result += Math.floor(company["Market Cap"]);
@@ -8754,11 +8828,24 @@ class Board {
     return result;
   }
 
+  handleMouseOver(e,ctx){
+    this.companies.forEach((company) => {
+      if (Math.abs(e.clientX - company.x) <= company.radius &&
+          Math.abs(e.clientY - company.y) <= company.radius) {
+        company.hover = true;
+        this.render(ctx);
+      } else {
+        company.hover = false;
+      }
+    });
+  }
 
+  render(){
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.companies.forEach(company => {
+      company.draw(this.ctx);
+    });
 
-  render(ctx){
-    document.addEventListener("onmousemove", this.handleMouseOver);
-    this.test.draw(ctx);
   }
 }
 
