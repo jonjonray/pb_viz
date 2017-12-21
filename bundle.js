@@ -9448,21 +9448,35 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 document.addEventListener("DOMContentLoaded", function () {
 
-  var simulation = d3.forceSimulation().force("forceX", d3.forceX().strength(0.02).x("900")).force("forceY", d3.forceY().strength(0.05).y("1000"))
-  // .force("center", d3.forceCenter().x("650").y("1000"))
+  var maxBook = void 0;
+  var minBook = void 0;
+  var companyRadius = {};
+
+  function maxMinAssign() {
+    for (var i = 0; i < _financials2.default.length; i++) {
+      var company = _financials2.default[i];
+      var bookVal = company["Market Cap"] / company["Price/Book"];
+      companyRadius[company["Symbol"]] = bookVal === Infinity ? 10 : bookVal;
+      if (maxBook === undefined && minBook === undefined) {
+        maxBook = bookVal;
+        minBook = bookVal;
+      } else if (maxBook < bookVal && bookVal !== Infinity) {
+        maxBook = bookVal;
+      } else if (minBook > bookVal) {
+        minBook = bookVal;
+      }
+    }
+  }
+
+  maxMinAssign();
+
+  var rscale = d3.scaleLinear().domain([minBook, 731]).range([10, 350]);
+
+  var simulation = d3.forceSimulation(_financials2.default).force("forceX", d3.forceX().strength(0.02).x("900")).force("forceY", d3.forceY().strength(0.05).y("1000"))
+  // .force("center", d3.forceCenter().x("900").y("1000"))
   .force("charge", d3.forceManyBody().strength(-10)).force("collide", d3.forceCollide().radius(function (d) {
-    return rscale(d["Market Cap"]) + 0.5;
-  }).iterations(5));
-
-  var svg = d3.select("#root").append("svg").attr("width", "1300px").attr("height", "2000px");
-
-  var rscale = d3.scaleLinear().domain([1, 731]).range([10, 100]);
-
-  var nodes = svg.selectAll('.circles').data(_financials2.default).enter().append('circle').attr('r', function (d) {
-    return rscale(d["Market Cap"]);
-  }).attr('class', 'circles').attr('stroke', 'black').attr('fill', '#4286f4');
-
-  simulation.nodes(_financials2.default).on("tick", function (d) {
+    return rscale(companyRadius[d["Symbol"]]) + 2;
+  }).iterations(5)).on("tick", function (d) {
     nodes.attr("cx", function (e) {
       return e.x;
     }).attr("cy", function (e) {
@@ -9470,8 +9484,50 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-  // node = node.sort(function(a,b){ return a.size - b.size; });
+  var svg = d3.select("#root").append("svg").attr("width", "1300px").attr("height", "2000px");
 
+  var nodes = svg.selectAll('.circle').data(_financials2.default).enter().append("g").append('circle').attr('r', function (d) {
+    return rscale(companyRadius[d["Symbol"]]);
+  }).attr('class', 'circles').attr('stroke', 'black').attr('fill', '#4286f4').on("mouseover", handleMouseOver).on("mouseout", handleMouseOut);
+
+  simulation.nodes(_financials2.default).restart();
+
+  var grouping = svg.selectAll('g');
+
+  function handleMouseOver(d, i) {
+    // Add interactivity
+
+    d3.select(this).transition().duration(1500).tween('radius', function (datum) {
+      var int = d3.interpolate(d.radius, rscale(d["Market Cap"]));
+      var that = this;
+      return function (t) {
+        d.radius = int(t);
+        companyRadius[d["Symbol"]] = d["Market Cap"];
+        simulation.nodes(_financials2.default);
+        simulation.restart();
+      };
+    }).attr('r', function (data) {
+      return rscale(data["Market Cap"]);
+    }).attr('fill', 'orange');
+  }
+
+  function handleMouseOut(d, i) {
+
+    var bookVal = d["Market Cap"] / d["Price/Book"] === Infinity ? 10 : d["Market Cap"] / d["Price/Book"];
+    d3.select(this).transition().duration(1500).tween('radius', function (datum) {
+      var int = d3.interpolate(d.radius, rscale(bookVal));
+      return function (t) {
+        d.radius = int(t);
+        companyRadius[d["Symbol"]] = bookVal;
+        simulation.nodes(_financials2.default);
+        simulation.restart();
+      };
+    }).attr('r', function (data) {
+      return rscale(bookVal);
+    }).attr('fill', '#4286f4');
+  }
+
+  // node = node.sort(function(a,b){ return a.size - b.size; });
 });
 
 /***/ }),
@@ -10378,7 +10434,7 @@ var financials = [{
   "Market Cap": 20.29,
   "EBITDA": 2.39,
   "Price/Sales": 1.92,
-  "Price/Book": "",
+  "Price/Book": 1.1,
   "SEC Filings": "http://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=AZO"
 }, {
   "Symbol": "AVB",
@@ -10541,22 +10597,6 @@ var financials = [{
   "Price/Book": 2.23,
   "SEC Filings": "http://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=BBBY"
 }, {
-  "Symbol": "BRK.B",
-  "Name": "Berkshire Hathaway",
-  "Sector": "Financials",
-  "Price": "",
-  "Dividend Yield": "",
-  "Price/Earnings": "",
-  "Earnings/Share": "",
-  "Book Value": "",
-  "52 week low": "",
-  "52 week high": "",
-  "Market Cap": "",
-  "EBITDA": "",
-  "Price/Sales": "",
-  "Price/Book": "",
-  "SEC Filings": "http://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=BRK.B"
-}, {
   "Symbol": "BBY",
   "Name": "Best Buy Co. Inc.",
   "Sector": "Consumer Discretionary",
@@ -10618,7 +10658,7 @@ var financials = [{
   "Market Cap": 4.32,
   "EBITDA": 0.82645,
   "Price/Sales": 1.43,
-  "Price/Book": "",
+  "Price/Book": 2.4,
   "SEC Filings": "http://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=HRB"
 }, {
   "Symbol": "BA",
@@ -10716,22 +10756,6 @@ var financials = [{
   "Price/Sales": 5.57,
   "Price/Book": 4.57,
   "SEC Filings": "http://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=AVGO"
-}, {
-  "Symbol": "BF.B",
-  "Name": "Brown-Forman Corp.",
-  "Sector": "Consumer Staples",
-  "Price": "",
-  "Dividend Yield": "",
-  "Price/Earnings": "",
-  "Earnings/Share": 2.96,
-  "Book Value": "",
-  "52 week low": "",
-  "52 week high": "",
-  "Market Cap": "",
-  "EBITDA": "",
-  "Price/Sales": "",
-  "Price/Book": "",
-  "SEC Filings": "http://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=BF.B"
 }, {
   "Symbol": "CHRW",
   "Name": "C. H. Robinson Worldwide",
@@ -11066,7 +11090,7 @@ var financials = [{
   "Market Cap": 4.67,
   "EBITDA": 0.215,
   "Price/Sales": 0.61,
-  "Price/Book": "",
+  "Price/Book": 1.3,
   "SEC Filings": "http://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=CHK"
 }, {
   "Symbol": "CVX",

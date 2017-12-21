@@ -948,7 +948,7 @@ const financials = [
     "Market Cap": 20.29,
     "EBITDA": 2.39,
     "Price/Sales": 1.92,
-    "Price/Book": "",
+    "Price/Book": 1.1,
     "SEC Filings": "http://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=AZO"
   },
   {
@@ -1122,23 +1122,6 @@ const financials = [
     "SEC Filings": "http://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=BBBY"
   },
   {
-    "Symbol": "BRK.B",
-    "Name": "Berkshire Hathaway",
-    "Sector": "Financials",
-    "Price": "",
-    "Dividend Yield": "",
-    "Price/Earnings": "",
-    "Earnings/Share": "",
-    "Book Value": "",
-    "52 week low": "",
-    "52 week high": "",
-    "Market Cap": "",
-    "EBITDA": "",
-    "Price/Sales": "",
-    "Price/Book": "",
-    "SEC Filings": "http://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=BRK.B"
-  },
-  {
     "Symbol": "BBY",
     "Name": "Best Buy Co. Inc.",
     "Sector": "Consumer Discretionary",
@@ -1203,7 +1186,7 @@ const financials = [
     "Market Cap": 4.32,
     "EBITDA": 0.82645,
     "Price/Sales": 1.43,
-    "Price/Book": "",
+    "Price/Book": 2.4,
     "SEC Filings": "http://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=HRB"
   },
   {
@@ -1307,23 +1290,6 @@ const financials = [
     "Price/Sales": 5.57,
     "Price/Book": 4.57,
     "SEC Filings": "http://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=AVGO"
-  },
-  {
-    "Symbol": "BF.B",
-    "Name": "Brown-Forman Corp.",
-    "Sector": "Consumer Staples",
-    "Price": "",
-    "Dividend Yield": "",
-    "Price/Earnings": "",
-    "Earnings/Share": 2.96,
-    "Book Value": "",
-    "52 week low": "",
-    "52 week high": "",
-    "Market Cap": "",
-    "EBITDA": "",
-    "Price/Sales": "",
-    "Price/Book": "",
-    "SEC Filings": "http://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=BF.B"
   },
   {
     "Symbol": "CHRW",
@@ -1679,7 +1645,7 @@ const financials = [
     "Market Cap": 4.67,
     "EBITDA": 0.215,
     "Price/Sales": 0.61,
-    "Price/Book": "",
+    "Price/Book": 1.3,
     "SEC Filings": "http://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=CHK"
   },
   {
