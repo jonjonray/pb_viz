@@ -33,9 +33,9 @@ var rscale = d3.scaleLinear()
 
 
   var simulation = d3.forceSimulation(Financials)
-      .force("forceX", d3.forceX().strength(0.02).x("900"))
-      .force("forceY", d3.forceY().strength(0.05).y("1000"))
-      // .force("center", d3.forceCenter().x("900").y("1000"))
+      .force("forceX", d3.forceX().strength(0.03).x("1000"))
+      .force("forceY", d3.forceY().strength(0.06).y("1000"))
+      .force("center", d3.forceCenter().x("900").y("1000"))
       .force("charge", d3.forceManyBody().strength(-10))
       .force("collide", d3.forceCollide().radius(function(d)
           {
@@ -51,7 +51,7 @@ var rscale = d3.scaleLinear()
 
   var svg = d3.select("#root")
 	.append("svg")
-	.attr("width", "1300px")
+	.attr("width", "2000px")
 	.attr("height","2000px");
 
 
@@ -71,8 +71,8 @@ var rscale = d3.scaleLinear()
   .attr('class','circles')
   .attr('stroke', 'black')
   .attr('fill', '#4286f4')
-  .on("mouseover", handleMouseOver)
-  .on("mouseout", handleMouseOut);
+  .on("click", handleClick);
+
 
   simulation.nodes(Financials).restart();
 
@@ -81,24 +81,34 @@ var rscale = d3.scaleLinear()
 
 
 
+  let selected;
 
 
 
 
 
+  function handleClick(d, i) {
+
+    if (selected) {
+      let normalize = handleRegular.bind(selected.scope);
+      normalize(selected.d,selected.i);
+    }
 
 
-  function handleMouseOver(d, i) {  // Add interactivity
+    if (!!selected && selected.scope === this) {
+      selected = null;
+    } else {
+    selected = {scope: this, d, i};
 
     d3.select(this)
         	  .transition()
-        	  .duration(1500)
+        	  .duration(1000)
             .tween('radius', function(datum) {
-          	   var int = d3.interpolate(d.radius, rscale(d["Market Cap"]));
+          	   var int = d3.interpolate(d.radius, rscale(datum["Market Cap"]));
                var that = this;
           	    return function(t) {
                   d.radius = int(t);
-                  companyRadius[d["Symbol"]] = d["Market Cap"];
+                  companyRadius[datum["Symbol"]] = datum["Market Cap"];
                   simulation.nodes(Financials);
                   simulation.restart();
 
@@ -110,32 +120,41 @@ var rscale = d3.scaleLinear()
             })
             .attr('fill', 'orange');
 
+          }
 
-}
+          // window.setTimeout(() => {
+          //   simulation.nodes(Financials);
+          //   simulation.alpha(1).restart();
+          // }, 1500);
 
-   function handleMouseOut(d, i) {
+    }
+
+
+   function handleRegular(d, i) {
 
      let bookVal = d["Market Cap"] / d["Price/Book"] === Infinity ? 10 : d["Market Cap"] / d["Price/Book"] ;
+
+     console.log(companyRadius[d["Symbol"]]);
+
      d3.select(this)
      .transition()
-     .duration(1500)
+     .duration(1000)
      .tween('radius', function(datum) {
         var int = d3.interpolate(d.radius, rscale(bookVal));
          return function(t) {
            d.radius = int(t);
            companyRadius[d["Symbol"]] = bookVal;
            simulation.nodes(Financials);
-           simulation.restart();
+           simulation.alpha(1).restart();
      };
     })
      .attr('r', function(data) {
        return rscale(bookVal);
      })
      .attr('fill', '#4286f4');
-
-
-
+     console.log(companyRadius[d["Symbol"]]);
   }
+
 
   // node = node.sort(function(a,b){ return a.size - b.size; });
 
