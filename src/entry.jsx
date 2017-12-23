@@ -1,6 +1,7 @@
 import Financials from './financials.js';
 import * as d3 from "d3";
-
+import d3Tip from "d3-tip";
+d3.tip = d3Tip;
 
 document.addEventListener("DOMContentLoaded", () => {
 
@@ -42,6 +43,23 @@ document.addEventListener("DOMContentLoaded", () => {
 
 initialize();
 
+  var ul = d3.select(".key").append("ul");
+
+   ul.selectAll('li')
+      .data(Object.keys(COMPANY_COLOR_KEY))
+      .enter()
+      .append('li')
+      .html(String)
+      .append('div')
+      .style('width', '20px')
+      .style('height', '20px')
+      .style('background-color', d => {
+
+      return `${COMPANY_COLOR_KEY[d]}`;
+
+    });
+
+
 
 var rscale = d3.scaleLinear()
           .domain([minBook,731])
@@ -50,8 +68,8 @@ var rscale = d3.scaleLinear()
 
   var simulation = d3.forceSimulation(Financials)
       .force("forceX", d3.forceX().strength(0.02).x("1000"))
-      .force("forceY", d3.forceY().strength(0.04).y("1000"))
-      .force("center", d3.forceCenter().x("900").y("1000"))
+      .force("forceY", d3.forceY().strength(0.04).y("600"))
+      .force("center", d3.forceCenter().x("1000").y("600"))
       .force("charge", d3.forceManyBody().strength(-10))
       .force("collide", d3.forceCollide().radius(function(d)
           {
@@ -68,15 +86,28 @@ var rscale = d3.scaleLinear()
   var svg = d3.select("#root")
 	    .append("svg")
 	    .attr("width", "2000px")
-	    .attr("height","2000px");
+	    .attr("height","1200px");
 
 
 
+      let tip = d3.tip()
+                  .attr('class', 'd3-tip')
+                  .direction('n')
+                  .offset([-5,0])
+                  .html(function(d) {
+        return `<span class='tool-tip'><ul>
+        <li>Company: ${d["Name"]} (${d["Symbol"]}) </li>
+        <li>Market Cap: ${d["Market Cap"]} </li>
+        <li>P/B: ${d["Price/Book"]} </li>
+        <li>Sector: ${d["Sector"]} </li>
+        </ul>
+      </span>`;
+      });
+
+    svg.call(tip);
 
 
-
-
-  var nodes = svg.selectAll('.circle')
+  var nodes = svg.selectAll('.circles')
       .data(Financials)
       .enter()
       .append("g")
@@ -89,7 +120,9 @@ var rscale = d3.scaleLinear()
       .attr('fill', (d) => {
         return companyRadius[d["Symbol"]]["color"];
       })
-      .on("click", handleClick);
+      .on("click", handleClick)
+      .on('mouseover', tip.show)
+      .on('mouseout', tip.hide);
 
 
   simulation.nodes(Financials).restart();
@@ -114,7 +147,7 @@ var rscale = d3.scaleLinear()
 
     d3.select(this)
         	  .transition()
-        	  .duration(1000)
+        	  .duration(800)
             .tween('radius', function(data) {
           	   var int = d3.interpolate(d.radius, rscale(data["Market Cap"]));
                var that = this;
@@ -131,7 +164,7 @@ var rscale = d3.scaleLinear()
               return rscale(data["Market Cap"]);
             })
             .attr('fill', '#00ff50')
-            // .attr('stroke', 'red')
+            .attr('stroke', '#424242')
             .attr('stroke-width', '5px');
 
           }
