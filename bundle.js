@@ -9452,11 +9452,25 @@ document.addEventListener("DOMContentLoaded", function () {
   var minBook = void 0;
   var companyRadius = {};
 
-  function maxMinAssign() {
+  var COMPANY_COLOR_KEY = {
+    "Industrials": "red",
+    "Health Care": "blue",
+    "Information Technology": "#ff9d00",
+    "Consumer Discretionary": "yellow",
+    "Utilities": "pink",
+    "Financials": "#ff6b6b",
+    "Materials": "brown",
+    "Consumer Staples": "black",
+    "Real Estate": "#7aadff",
+    "Energy": "#2df4ff",
+    "Telecommunications Services": "#7228fc"
+  };
+
+  function initialize() {
     for (var i = 0; i < _financials2.default.length; i++) {
       var company = _financials2.default[i];
-      var bookVal = company["Market Cap"] / company["Price/Book"];
-      companyRadius[company["Symbol"]] = bookVal === Infinity ? 10 : bookVal;
+      var bookVal = company["Market Cap"] / company["Price/Book"] === Infinity ? 10 : company["Market Cap"] / company["Price/Book"];
+      companyRadius[company["Symbol"]] = { radius: bookVal, color: COMPANY_COLOR_KEY[company["Sector"]] };
       if (maxBook === undefined && minBook === undefined) {
         maxBook = bookVal;
         minBook = bookVal;
@@ -9468,12 +9482,12 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-  maxMinAssign();
+  initialize();
 
   var rscale = d3.scaleLinear().domain([minBook, 731]).range([10, 350]);
 
-  var simulation = d3.forceSimulation(_financials2.default).force("forceX", d3.forceX().strength(0.03).x("1000")).force("forceY", d3.forceY().strength(0.06).y("1000")).force("center", d3.forceCenter().x("900").y("1000")).force("charge", d3.forceManyBody().strength(-10)).force("collide", d3.forceCollide().radius(function (d) {
-    return rscale(companyRadius[d["Symbol"]]) + 2;
+  var simulation = d3.forceSimulation(_financials2.default).force("forceX", d3.forceX().strength(0.02).x("1000")).force("forceY", d3.forceY().strength(0.04).y("1000")).force("center", d3.forceCenter().x("900").y("1000")).force("charge", d3.forceManyBody().strength(-10)).force("collide", d3.forceCollide().radius(function (d) {
+    return rscale(companyRadius[d["Symbol"]]["radius"]) + 2;
   }).iterations(5)).on("tick", function (d) {
     nodes.attr("cx", function (e) {
       return e.x;
@@ -9485,12 +9499,12 @@ document.addEventListener("DOMContentLoaded", function () {
   var svg = d3.select("#root").append("svg").attr("width", "2000px").attr("height", "2000px");
 
   var nodes = svg.selectAll('.circle').data(_financials2.default).enter().append("g").append('circle').attr('r', function (d) {
-    return rscale(companyRadius[d["Symbol"]]);
-  }).attr('class', 'circles').attr('stroke', 'black').attr('fill', '#4286f4').on("click", handleClick);
+    return rscale(companyRadius[d["Symbol"]]["radius"]);
+  }).attr('class', 'circles').attr('stroke', 'black').attr('fill', function (d) {
+    return companyRadius[d["Symbol"]]["color"];
+  }).on("click", handleClick);
 
   simulation.nodes(_financials2.default).restart();
-
-  var grouping = svg.selectAll('g');
 
   var selected = void 0;
 
@@ -9506,44 +9520,40 @@ document.addEventListener("DOMContentLoaded", function () {
     } else {
       selected = { scope: this, d: d, i: i };
 
-      d3.select(this).transition().duration(1000).tween('radius', function (datum) {
-        var int = d3.interpolate(d.radius, rscale(datum["Market Cap"]));
+      d3.select(this).transition().duration(1000).tween('radius', function (data) {
+        var int = d3.interpolate(d.radius, rscale(data["Market Cap"]));
         var that = this;
         return function (t) {
           d.radius = int(t);
-          companyRadius[datum["Symbol"]] = datum["Market Cap"];
+          companyRadius[data["Symbol"]]["radius"] = data["Market Cap"];
           simulation.nodes(_financials2.default);
           simulation.restart();
         };
       }).attr('r', function (data) {
         return rscale(data["Market Cap"]);
-      }).attr('fill', 'orange');
+      }).attr('fill', '#00ff50')
+      // .attr('stroke', 'red')
+      .attr('stroke-width', '5px');
     }
-
-    // window.setTimeout(() => {
-    //   simulation.nodes(Financials);
-    //   simulation.alpha(1).restart();
-    // }, 1500);
   }
 
   function handleRegular(d, i) {
 
     var bookVal = d["Market Cap"] / d["Price/Book"] === Infinity ? 10 : d["Market Cap"] / d["Price/Book"];
 
-    console.log(companyRadius[d["Symbol"]]);
-
     d3.select(this).transition().duration(1000).tween('radius', function (datum) {
       var int = d3.interpolate(d.radius, rscale(bookVal));
       return function (t) {
         d.radius = int(t);
-        companyRadius[d["Symbol"]] = bookVal;
+        companyRadius[d["Symbol"]]["radius"] = bookVal;
         simulation.nodes(_financials2.default);
         simulation.alpha(1).restart();
       };
     }).attr('r', function (data) {
       return rscale(bookVal);
-    }).attr('fill', '#4286f4');
-    console.log(companyRadius[d["Symbol"]]);
+    }).attr('fill', function (data) {
+      return companyRadius[d["Symbol"]]["color"];
+    }).attr('stroke', 'black').attr('stroke-width', "1px");
   }
 
   // node = node.sort(function(a,b){ return a.size - b.size; });
