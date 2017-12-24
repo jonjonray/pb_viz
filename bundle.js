@@ -9509,7 +9509,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-  var svg = d3.select("#root").append("svg").attr("width", "2000px").attr("height", "1200px");
+  var svg = d3.select("#root").append("svg").attr("width", "100%").attr("height", "1200px");
 
   var tip = d3.tip().attr('class', 'd3-tip').direction('n').offset([-5, 0]).html(function (d) {
     return "<span class='tool-tip'><ul>\n        <li>Company: " + d["Name"] + " (" + d["Symbol"] + ") </li>\n        <li>Market Cap: " + d["Market Cap"] + " </li>\n        <li>P/B: " + d["Price/Book"] + " </li>\n        <li>Sector: " + d["Sector"] + " </li>\n        </ul>\n      </span>";

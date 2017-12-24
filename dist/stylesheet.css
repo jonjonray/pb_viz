@@ -3,7 +3,7 @@
   border: 1px solid black;
   display: flex;
   padding-left: 3px;
-  padding-right: 3px;
+  padding-right: 30px;
   box-shadow: 0 2px 5px rgba(0,0,0,.26);
 }
 
@@ -16,9 +16,11 @@
   padding: 40px;
   display: flex;
   background: #9bdcff;
+  box-shadow: 0 8px 6px -6px black;
 }
 .key {
   width: 100%;
+  box-shadow: 0 8px 6px -6px black;
 }
 
 
@@ -45,8 +47,15 @@
 
 .key ul li div {
   margin-left: 20px;
+  border-radius: 50%;
+}
+
+svg {
+  border: 1px solid black;
+  box-shadow: 3px 3px 5px 6px #ccc; 
 }
 
 * {
   font-family: 'Roboto', sans-serif;
+  font-size: large;
 }

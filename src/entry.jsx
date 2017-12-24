@@ -85,7 +85,7 @@ var rscale = d3.scaleLinear()
 
   var svg = d3.select("#root")
 	    .append("svg")
-	    .attr("width", "2000px")
+	    .attr("width", "100%")
 	    .attr("height","1200px");
 
 
