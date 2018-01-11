@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let maxBook;
   let minBook;
   let companyRadius = {};
-
+  let width = window.innerWidth;
 
   const COMPANY_COLOR_KEY = {
      "Industrials": "red",
@@ -67,7 +67,7 @@ var rscale = d3.scaleLinear()
 
 
   var simulation = d3.forceSimulation(Financials)
-      .force("forceX", d3.forceX().strength(0.02).x("1000"))
+      .force("forceX", d3.forceX().strength(0.02).x(width/2))
       .force("forceY", d3.forceY().strength(0.04).y("600"))
       .force("center", d3.forceCenter().x("1000").y("600"))
       .force("charge", d3.forceManyBody().strength(-10))
@@ -85,7 +85,7 @@ var rscale = d3.scaleLinear()
 
   var svg = d3.select("#root")
 	    .append("svg")
-	    .attr("width", "100%")
+	    .attr("width", "80%")
 	    .attr("height","1200px");
 
 
